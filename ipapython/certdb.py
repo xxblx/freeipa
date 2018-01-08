@@ -885,8 +885,11 @@ class NSSDatabase:
         args = ["-A", "-n", nick, "-t", flags, '-a']
         self.run_certutil(args, stdin=cert.public_bytes(x509.Encoding.PEM))
 
-    def delete_cert(self, nick):
-        self.run_certutil(["-D", "-n", nick])
+    def delete_cert(self, nick, delete_key=True):
+        opts = ['-F', '-n', nick]
+        if not delete_key:
+            opts[0] = '-D'
+        self.run_certutil(opts)
 
     def verify_server_cert_validity(self, nickname, hostname):
         """Verify a certificate is valid for a SSL server with given hostname

@@ -167,3 +167,41 @@ def test_auto_db():
         assert nssdb.filenames is not None
         assert nssdb.exists()
         nssdb.list_certs()
+
+
+def test_cert_key_delete():
+    with NSSDatabase() as nssdb:
+        nssdb.create_db()
+
+        create_selfsigned(nssdb)
+        assert len(nssdb.list_certs()) == 1
+        assert len(nssdb.list_keys()) == 1
+
+        nssdb.delete_cert(CERTNICK)
+        assert len(nssdb.list_certs()) == 0
+        assert len(nssdb.list_keys()) == 0
+
+
+def test_cert_detele():
+    with NSSDatabase() as nssdb:
+        nssdb.create_db()
+
+        create_selfsigned(nssdb)
+        assert len(nssdb.list_certs()) == 1
+        assert len(nssdb.list_keys()) == 1
+
+        # save cert, remove cert and key
+        cert = nssdb.get_cert(CERTNICK)
+        nssdb.delete_cert(CERTNICK)
+        assert len(nssdb.list_certs()) == 0
+        assert len(nssdb.list_keys()) == 0
+
+        # re-add cert without key
+        nssdb.add_cert(cert, CERTNICK, TRUSTED_PEER_TRUST_FLAGS)
+        assert len(nssdb.list_certs()) == 1
+        assert len(nssdb.list_keys()) == 0
+
+        # remove cert
+        nssdb.delete_cert(CERTNICK, delete_key=False)
+        assert len(nssdb.list_certs()) == 0
+        assert len(nssdb.list_keys()) == 0
